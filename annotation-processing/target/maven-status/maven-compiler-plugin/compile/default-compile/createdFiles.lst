@@ -1,0 +1,3 @@
+com\baeldung\annotation\processor\BuilderProcessor.class
+com\baeldung\annotation\processor\BuilderProperty.class
+META-INF\services\javax.annotation.processing.Processor
