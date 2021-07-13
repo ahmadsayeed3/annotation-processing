@@ -1,6 +1,8 @@
 package com.sid.learn;
 
+import com.sid.learn.creator.AnnotationParameter;
 import com.sid.learn.creator.ClassStringMaker;
+import com.sid.learn.creator.CustomAnnotation;
 import com.sid.learn.creator.CustomClass;
 import com.google.auto.service.AutoService;
 
@@ -13,6 +15,8 @@ import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 @SupportedAnnotationTypes("com.sid.learn.AutoController")
@@ -52,10 +56,18 @@ public class AutoControllerProcessor extends AbstractProcessor {
     }
 
     private void generateEntity(String className){
+        List<String> imports = Arrays.asList("javax.persistence.Entity",
+                "javax.persistence.Table");
+        List<CustomAnnotation> customAnnotations = Arrays.asList(
+                new CustomAnnotation("Entity", null),
+                new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\"user\""))));
+
         String entityClassName = className + "Entity";
         CustomClass customClass = CustomClass.builder()
                 .packageName("com.auto.controller.entity")
+                .imports(imports)
                 .className(entityClassName)
+                .customAnnotations(customAnnotations)
                 .build();
         ClassStringMaker classStringMaker = new ClassStringMaker(customClass);
         String classString = classStringMaker.make();
