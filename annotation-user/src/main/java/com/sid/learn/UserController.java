@@ -1,13 +1,12 @@
-package com.baeldung.annotation;
+package com.sid.learn;
 
 import com.auto.controller.entity.UserEntity;
-import com.baeldung.annotation.processor.AutoController;
 
 public class UserController {
 
     @AutoController(name = "User", tableName = "user")
     public String getUser(){
-        UserEntity userEntity = new UserEntity();
+       UserEntity userEntity = new UserEntity();
         return "";
     }
 

@@ -1,6 +1,6 @@
-package com.baeldung.annotation;
+package com.sid.learn;
 
-import com.baeldung.annotation.processor.BuilderProperty;
+import com.sid.learn.BuilderProperty;
 
 public class Person {
 

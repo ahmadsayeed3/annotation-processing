@@ -1,16 +1,15 @@
-package com.baeldung.annotation.processor.creator;
+package com.sid.learn.creator;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class CustomMethod {
+public class CustomField {
 
     private String modifier;
     private String returnType;
     private String name;
-    private List<MethodParameter> methodParameters;
     private List<CustomAnnotation> customAnnotations;
 
 }

@@ -1,5 +1,5 @@
-import com.baeldung.annotation.Person;
-import com.baeldung.annotation.PersonBuilder;
+import com.sid.learn.Person;
+import com.sid.learn.PersonBuilder;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

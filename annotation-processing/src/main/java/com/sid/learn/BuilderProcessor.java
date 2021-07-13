@@ -1,4 +1,4 @@
-package com.baeldung.annotation.processor;
+package com.sid.learn;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,7 +16,7 @@ import javax.tools.JavaFileObject;
 
 import com.google.auto.service.AutoService;
 
-@SupportedAnnotationTypes("com.baeldung.annotation.processor.BuilderProperty")
+@SupportedAnnotationTypes("com.sid.learn.BuilderProperty")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
 public class BuilderProcessor extends AbstractProcessor {
