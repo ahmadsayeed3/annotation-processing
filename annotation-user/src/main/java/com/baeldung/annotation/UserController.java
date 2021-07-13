@@ -1,6 +1,6 @@
 package com.baeldung.annotation;
 
-import com.baeldung.annotation.UserEntity;
+import com.auto.controller.entity.UserEntity;
 import com.baeldung.annotation.processor.AutoController;
 
 public class UserController {

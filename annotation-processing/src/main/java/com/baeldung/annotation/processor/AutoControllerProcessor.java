@@ -39,37 +39,37 @@ public class AutoControllerProcessor extends AbstractProcessor {
         roundEnv.getElementsAnnotatedWith(AutoController.class)
                 .forEach(element -> {
                     if(element.getKind() == ElementKind.METHOD){
-
-                        System.out.println("Getting HERE");
                         AutoController autoController = element.getAnnotation(AutoController.class);
                         String name = autoController.name();
-
-                        String packageName = "com.baeldung.annotation";
-                        System.out.println(packageName + " " +name);
-                        generateClass(packageName, name + "Entity");
+                        generateClass(name);
                     }
                 });
         return false;
     }
 
-    private void generateClass(String packageName, String className){
+    private void generateClass(String className){
+        generateEntity(className);
+    }
 
-
-
+    private void generateEntity(String className){
+        String entityClassName = className + "Entity";
         CustomClass customClass = CustomClass.builder()
-                .packageName(packageName)
-                .className(className)
+                .packageName("com.auto.controller.entity")
+                .className(entityClassName)
                 .build();
         ClassStringMaker classStringMaker = new ClassStringMaker(customClass);
         String classString = classStringMaker.make();
+        generateClass(entityClassName, classString);
+    }
+
+    private void generateClass(String className, String classText){
         try {
             JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(className);
             PrintWriter out = new PrintWriter(builderFile.openWriter());
-            out.print(classString);
+            out.print(classText);
             out.close();
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
-
     }
 }

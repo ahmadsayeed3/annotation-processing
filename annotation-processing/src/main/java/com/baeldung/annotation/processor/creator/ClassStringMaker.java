@@ -19,21 +19,21 @@ public class ClassStringMaker {
     }
 
     private void setPackage(){
-        classString.append("package ").append(customClass.getPackageName()).append(";");
+        classString.append("package ").append(customClass.getPackageName()).append(";").append("\n");
     }
 
     private void setImports(){
         customClass.getImports().forEach(importClassPath -> {
-            classString.append("import ").append(importClassPath).append(";");
+            classString.append("import ").append(importClassPath).append(";").append("\n");
         });
     }
 
     private void setClassName(){
-        classString.append("public class ").append(customClass.getClassName()).append("{");
+        classString.append("public class ").append(customClass.getClassName()).append("{").append("\n");
     }
 
     private void setCloseClass(){
-        classString.append("}");
+        classString.append("}").append("\n");
     }
 
 }
