@@ -1,9 +1,6 @@
 package com.sid.learn;
 
-import com.sid.learn.creator.AnnotationParameter;
-import com.sid.learn.creator.ClassStringMaker;
-import com.sid.learn.creator.CustomAnnotation;
-import com.sid.learn.creator.CustomClass;
+import com.sid.learn.creator.*;
 import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.*;
@@ -13,6 +10,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
+import java.beans.Introspector;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -46,15 +44,16 @@ public class AutoControllerProcessor extends AbstractProcessor {
                     if(element.getKind() == ElementKind.METHOD){
                         AutoController autoController = element.getAnnotation(AutoController.class);
                         String name = autoController.name();
-                        generateClass(name);
+                        generateClassFileAndSource(name);
                     }
                 });
         return false;
     }
 
-    private void generateClass(String className){
+    private void generateClassFileAndSource(String className){
         generateEntity(className);
         generateDTO(className);
+        generateMapper(className);
     }
 
     private void generateEntity(String className){
@@ -70,12 +69,13 @@ public class AutoControllerProcessor extends AbstractProcessor {
         CustomClass customClass = CustomClass.builder()
                 .packageName(entityPackage)
                 .imports(imports)
+                .classType("class")
                 .className(entityClassName)
                 .customAnnotations(customAnnotations)
                 .build();
         ClassStringMaker classStringMaker = new ClassStringMaker(customClass);
-        String classString = classStringMaker.make();
-        generateClass(fullClassName, classString);
+        String classString = classStringMaker.classAsString();
+        generateClassFileAndSource(fullClassName, classString);
     }
 
     private void generateDTO(String className){
@@ -87,15 +87,56 @@ public class AutoControllerProcessor extends AbstractProcessor {
         String fullClassName = dtoPackage + "." + dtoClassName;
         CustomClass customClass = CustomClass.builder().packageName(dtoPackage)
                 .imports(imports)
+                .classType("class")
                 .className(dtoClassName)
                 .customAnnotations(classAnnotations)
                 .build();
 
-        String classAsString = new ClassStringMaker(customClass).make();
-        generateClass(fullClassName, classAsString);
+        String classAsString = new ClassStringMaker(customClass).classAsString();
+        generateClassFileAndSource(fullClassName, classAsString);
     }
 
-    private void generateClass(String fullClassName, String classText){
+    private void generateMapper(String className){
+        String dtoClassImport = "com.auto.controller.dto." + className + "DTO";
+        String entityClassImport = "com.auto.controller.entity." + className + "Entity";
+        List<String> imports = Arrays.asList("org.mapstruct.*", dtoClassImport, entityClassImport);
+
+        List<CustomAnnotation> customAnnotations = Arrays.asList(
+                new CustomAnnotation("Mapper", Arrays.asList(new AnnotationParameter("componentModel", "\"spring\""))));
+
+        String mapperClassName = className + "Mapper";
+        String mapperPackage = DEFAULT_PACKAGE + "." + "mapper";
+        String fullClassName = mapperPackage + "." + mapperClassName;
+
+        CustomMethod dtoToEntityMethod = new CustomMethod();
+        dtoToEntityMethod.setModifier("public");
+        dtoToEntityMethod.setReturnType(className + "Entity");
+        dtoToEntityMethod.setName("dtoToEntity");
+        List<MethodParameter> methodParameters = Arrays.asList(new MethodParameter(className + "DTO", Introspector.decapitalize(className + "DTO"), null));
+        dtoToEntityMethod.setMethodParameters(methodParameters);
+
+        CustomMethod entityToDtoMethod = new CustomMethod();
+        entityToDtoMethod.setModifier("public");
+        entityToDtoMethod.setReturnType(className + "DTO");
+        entityToDtoMethod.setName("entityToDTO");
+        List<MethodParameter> entityToDtoParameters = Arrays.asList(new MethodParameter(className + "Entity", Introspector.decapitalize(className + "Entity"), null));
+        entityToDtoMethod.setMethodParameters(entityToDtoParameters);
+
+        CustomClass customClass = CustomClass.builder()
+                .packageName(mapperPackage)
+                .imports(imports)
+                .classType("interface")
+                .className(mapperClassName)
+                .customAnnotations(customAnnotations)
+                .customMethods(Arrays.asList(dtoToEntityMethod, entityToDtoMethod))
+                .build();
+
+        String classAsString = new ClassStringMaker(customClass).classAsString();
+        generateClassFileAndSource(fullClassName, classAsString);
+
+    }
+
+    private void generateClassFileAndSource(String fullClassName, String classText){
         try {
             JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(fullClassName);
             PrintWriter out = new PrintWriter(builderFile.openWriter());

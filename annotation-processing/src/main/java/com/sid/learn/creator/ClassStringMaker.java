@@ -10,10 +10,11 @@ public class ClassStringMaker {
         this.classString = new StringBuilder();
     }
 
-    public String make(){
+    public String classAsString(){
         setPackage();
         setImports();
         setClassName();
+        setAbstractMethod();
         setCloseClass();
         return classString.toString();
     }
@@ -46,7 +47,28 @@ public class ClassStringMaker {
                 classString.append("\n");
             });
         }
-        classString.append("public class ").append(customClass.getClassName()).append("{").append("\n");
+        classString.append("public ").append(customClass.getClassType()).append(" ")
+                .append(customClass.getClassName()).append("{").append("\n");
+    }
+
+    private void setAbstractMethod(){
+        if(customClass.getCustomMethods() ==null)
+            return;
+
+        customClass.getCustomMethods().forEach(customMethod -> {
+            classString.append(customMethod.getModifier()).append(" ")
+                    .append(customMethod.getReturnType()).append(" ")
+                    .append(customMethod.getName()).append("(");
+
+            if(customMethod.getMethodParameters() !=null){
+                customMethod.getMethodParameters().forEach(methodParameter -> {
+                    classString.append(methodParameter.getType()).append(" ")
+                            .append(methodParameter.getName()).append(",");
+                });
+                classString.replace(classString.lastIndexOf(","), classString.length(), "");
+            }
+            classString.append(");\n");
+        });
     }
 
     private void setCloseClass(){

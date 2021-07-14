@@ -9,7 +9,9 @@ import java.util.List;
 @Getter
 public class CustomClass {
 
+
     private String packageName;
+    private String classType;
     private String className;
     private List<CustomField> classFields;
     private List<CustomMethod> customMethods;
