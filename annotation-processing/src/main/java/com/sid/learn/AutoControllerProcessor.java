@@ -28,6 +28,7 @@ public class AutoControllerProcessor extends AbstractProcessor {
     private Elements elementUtils;
     private Filer filer;
     private Messager messager;
+    private static String DEFAULT_PACKAGE = "com.auto.controller";
 
     @Override
     public void init(ProcessingEnvironment env) {
@@ -53,6 +54,7 @@ public class AutoControllerProcessor extends AbstractProcessor {
 
     private void generateClass(String className){
         generateEntity(className);
+        generateDTO(className);
     }
 
     private void generateEntity(String className){
@@ -62,21 +64,40 @@ public class AutoControllerProcessor extends AbstractProcessor {
                 new CustomAnnotation("Entity", null),
                 new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\"user\""))));
 
+        String entityPackage = DEFAULT_PACKAGE + ".entity";
         String entityClassName = className + "Entity";
+        String fullClassName = entityPackage + "." + entityClassName;
         CustomClass customClass = CustomClass.builder()
-                .packageName("com.auto.controller.entity")
+                .packageName(entityPackage)
                 .imports(imports)
                 .className(entityClassName)
                 .customAnnotations(customAnnotations)
                 .build();
         ClassStringMaker classStringMaker = new ClassStringMaker(customClass);
         String classString = classStringMaker.make();
-        generateClass(entityClassName, classString);
+        generateClass(fullClassName, classString);
     }
 
-    private void generateClass(String className, String classText){
+    private void generateDTO(String className){
+        List<String> imports = Arrays.asList("lombok.Data", "lombok.AllArgsConstructor", "lombok.NoArgsConstructor");
+        List<CustomAnnotation> classAnnotations = Arrays.asList(new CustomAnnotation("Data", null));
+
+        String dtoClassName = className + "DTO";
+        String dtoPackage = DEFAULT_PACKAGE + ".dto";
+        String fullClassName = dtoPackage + "." + dtoClassName;
+        CustomClass customClass = CustomClass.builder().packageName(dtoPackage)
+                .imports(imports)
+                .className(dtoClassName)
+                .customAnnotations(classAnnotations)
+                .build();
+
+        String classAsString = new ClassStringMaker(customClass).make();
+        generateClass(fullClassName, classAsString);
+    }
+
+    private void generateClass(String fullClassName, String classText){
         try {
-            JavaFileObject builderFile = processingEnv.getFiler().createSourceFile("com.auto.controller.entity." + className);
+            JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(fullClassName);
             PrintWriter out = new PrintWriter(builderFile.openWriter());
             out.print(classText);
             out.close();
