@@ -63,47 +63,40 @@ public class AutoControllerProcessor extends AbstractProcessor {
         generateEntity(autoController.name(), autoController.tableName());
         generateDTO(autoController.name());
         generateMapper(autoController.name());
-        generateRepository(autoController);
+        generateRepository(autoController.name());
     }
 
     private void generateEntity(String className, String tableName) throws SQLException, ClassNotFoundException {
-        List<String> imports = Arrays.asList("javax.persistence.Entity",
-                "javax.persistence.Table","lombok.Data", "lombok.AllArgsConstructor", "lombok.NoArgsConstructor");
-        List<CustomAnnotation> customAnnotations = Arrays.asList(
-                new CustomAnnotation("Entity", null),
-                new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\"user\""))),
-                new CustomAnnotation("Data", null),
-                new CustomAnnotation("AllArgsConstructor", null));
+
+        List<CustomAnnotation> customAnnotations = new ArrayList<>(Constants.ENTITY_CLASS_ANNOTATIONS);
+        customAnnotations.add(new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\""+tableName+"\""))));
+
 
         //TableMetaData tableMetaData = new TableMetaData(tableName);
-
-        String entityPackage = DEFAULT_PACKAGE + ".entity";
-        String entityClassName = className + "Entity";
-        String fullClassName = entityPackage + "." + entityClassName;
+        String entityClassName = className + Constants.SUFFIX_ENTITY;
+        String fullClassName = Constants.ENTITY_PACKAGE + "." + entityClassName;
         CustomClass customClass = CustomClass.builder()
-                .packageName(entityPackage)
-                .imports(imports)
+                .packageName(Constants.ENTITY_PACKAGE)
+                .imports(Constants.ENTITY_CLASS_IMPORTS)
                 .classType("class")
                 .className(entityClassName)
                 .customAnnotations(customAnnotations)
                 .build();
+
         ClassStringMaker classStringMaker = new ClassStringMaker(customClass);
         String classString = classStringMaker.classAsString();
         generateClassFileAndSource(fullClassName, classString);
     }
 
     private void generateDTO(String className){
-        List<String> imports = Arrays.asList("lombok.Data", "lombok.AllArgsConstructor", "lombok.NoArgsConstructor");
-        List<CustomAnnotation> classAnnotations = Arrays.asList(new CustomAnnotation("Data", null));
 
-        String dtoClassName = className + "DTO";
-        String dtoPackage = DEFAULT_PACKAGE + ".dto";
-        String fullClassName = dtoPackage + "." + dtoClassName;
-        CustomClass customClass = CustomClass.builder().packageName(dtoPackage)
-                .imports(imports)
+        String dtoClassName = className + Constants.SUFFIX_DTO;
+        String fullClassName = Constants.DTO_PACKAGE + "." + dtoClassName;
+        CustomClass customClass = CustomClass.builder().packageName(Constants.DTO_PACKAGE)
+                .imports(Constants.DTO_CLASS_IMPORTS)
                 .classType("class")
                 .className(dtoClassName)
-                .customAnnotations(classAnnotations)
+                .customAnnotations(Constants.DTO_CLASS_ANNOTATIONS)
                 .build();
 
         String classAsString = new ClassStringMaker(customClass).classAsString();
@@ -115,33 +108,23 @@ public class AutoControllerProcessor extends AbstractProcessor {
         String entityClassImport = "com.auto.controller.entity." + className + "Entity";
         List<String> imports = Arrays.asList("org.mapstruct.*", dtoClassImport, entityClassImport);
 
-        List<CustomAnnotation> customAnnotations = Arrays.asList(
-                new CustomAnnotation("Mapper", Arrays.asList(new AnnotationParameter("componentModel", "\"spring\""))));
+        String entityClassName = className + Constants.SUFFIX_ENTITY;
+        String dtoClassName = className + Constants.SUFFIX_DTO;
+        String mapperClassName = className + Constants.SUFFIX_MAPPER;
+        String fullClassName = Constants.MAPPER_PACKAGE + "." + mapperClassName;
 
-        String mapperClassName = className + "Mapper";
-        String mapperPackage = DEFAULT_PACKAGE + "." + "mapper";
-        String fullClassName = mapperPackage + "." + mapperClassName;
+        List<MethodParameter> methodParameters = Arrays.asList(new MethodParameter(dtoClassName, Introspector.decapitalize(dtoClassName), null));
+        CustomMethod dtoToEntityMethod = buildCustomMethod("public", entityClassName, "dtoToEntity", methodParameters);
 
-        CustomMethod dtoToEntityMethod = new CustomMethod();
-        dtoToEntityMethod.setModifier("public");
-        dtoToEntityMethod.setReturnType(className + "Entity");
-        dtoToEntityMethod.setName("dtoToEntity");
-        List<MethodParameter> methodParameters = Arrays.asList(new MethodParameter(className + "DTO", Introspector.decapitalize(className + "DTO"), null));
-        dtoToEntityMethod.setMethodParameters(methodParameters);
-
-        CustomMethod entityToDtoMethod = new CustomMethod();
-        entityToDtoMethod.setModifier("public");
-        entityToDtoMethod.setReturnType(className + "DTO");
-        entityToDtoMethod.setName("entityToDTO");
-        List<MethodParameter> entityToDtoParameters = Arrays.asList(new MethodParameter(className + "Entity", Introspector.decapitalize(className + "Entity"), null));
-        entityToDtoMethod.setMethodParameters(entityToDtoParameters);
+        List<MethodParameter> entityToDtoParameters = Arrays.asList(new MethodParameter(entityClassName, Introspector.decapitalize(entityClassName), null));
+        CustomMethod entityToDtoMethod = buildCustomMethod("public", dtoClassName, "entityToDTO", entityToDtoParameters);
 
         CustomClass customClass = CustomClass.builder()
-                .packageName(mapperPackage)
+                .packageName(Constants.MAPPER_PACKAGE)
                 .imports(imports)
                 .classType("interface")
                 .className(mapperClassName)
-                .customAnnotations(customAnnotations)
+                .customAnnotations(Constants.MAPPER_INTERFACE_IMPORTS)
                 .customMethods(Arrays.asList(dtoToEntityMethod, entityToDtoMethod))
                 .build();
 
@@ -150,30 +133,43 @@ public class AutoControllerProcessor extends AbstractProcessor {
 
     }
 
-    private void generateRepository(AutoController autoController){
-        String repositoryClassName = autoController.name() + "Repository";
-        String repositoryPackage = DEFAULT_PACKAGE + "." + "repository";
-        String fullClassName = repositoryPackage + "." + repositoryClassName;
-        String entityClassName = autoController.name() + "Entity";
+    private void generateRepository(String className){
+        String repositoryClassName = className + Constants.SUFFIX_REPOSITORY;
+        String fullClassName = Constants.REPOSITORY_PACKAGE + "." + repositoryClassName;
+        String entityClassName = className + Constants.SUFFIX_ENTITY;
 
-        List<String> imports = Arrays.asList("org.springframework.stereotype.Repository",
-                "org.springframework.data.jpa.repository.JpaRepository",
-                "com.auto.controller.entity." + entityClassName);
+        List<String> imports = new ArrayList<>(Constants.REPOSITORY_INTERFACE_IMPORTS);
+        imports.add("com.auto.controller.entity." + entityClassName);
 
-        List<CustomAnnotation> customAnnotations = Arrays.asList(new CustomAnnotation("Repository", null));
-
-
-
-        CustomClass customClass = CustomClass.builder().packageName(repositoryPackage)
+        CustomClass customClass = CustomClass.builder().packageName(Constants.REPOSITORY_PACKAGE)
                 .imports(imports)
                 .classType("interface")
                 .className(repositoryClassName)
                 .customClassExtends(new CustomClassExtends("JpaRepository", Arrays.asList(entityClassName, "Long")))
-                .customAnnotations(customAnnotations)
+                .customAnnotations(Constants.REPOSITORY_INTERFACE_ANNOTATIONS)
                 .build();
 
         String classAsString = new ClassStringMaker(customClass).classAsString();
         generateClassFileAndSource(fullClassName, classAsString);
+    }
+
+    private CustomClass buildCustomClass(String packageName, List<String> imports, String classType, String className, CustomClassExtends customClassExtends, List<CustomAnnotation> customAnnotations){
+        return CustomClass.builder().packageName(packageName)
+                .imports(imports)
+                .classType(classType)
+                .className(className)
+                .customClassExtends(customClassExtends)
+                .customAnnotations(customAnnotations)
+                .build();
+    }
+
+    private CustomMethod buildCustomMethod(String modifier, String returnType, String methodName, List<MethodParameter> methodParameters){
+        CustomMethod customMethod = new CustomMethod();
+        customMethod.setModifier(modifier);
+        customMethod.setReturnType(returnType);
+        customMethod.setName(methodName);
+        customMethod.setMethodParameters(methodParameters);
+        return customMethod;
     }
 
     private void generateClassFileAndSource(String fullClassName, String classText){
