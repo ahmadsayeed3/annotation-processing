@@ -9,6 +9,7 @@ import com.sid.learn.creator.database.TableCell;
 import com.sid.learn.creator.database.TableMetaData;
 
 import javax.annotation.processing.*;
+
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -58,37 +59,26 @@ public class AutoControllerProcessor extends AbstractProcessor {
     }
 
     private void generateClassFileAndSource(AutoController autoController) {
-        generateEntity(autoController.name(), autoController.tableName());
-        generateDTO(autoController.name());
-        generateMapper(autoController.name());
-        generateRepository(autoController.name());
-    }
-
-    private void generateEntity(String className, String tableName) {
-
-        List<CustomAnnotation> customAnnotations = new ArrayList<>(Constants.ENTITY_CLASS_ANNOTATIONS);
-        customAnnotations.add(new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\""+tableName+"\""))));
-
-        List<TableCell> tableCells = null;
+        List<TableCell> tableCells = new ArrayList<>();
         try {
-            TableMetaData tableMetaData = new TableMetaData(tableName);
+            TableMetaData tableMetaData = new TableMetaData(autoController.tableName());
             tableCells = tableMetaData.getTableCells();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+        generateEntity(autoController.name(), autoController.tableName(), tableCells);
+        generateDTO(autoController.name(), tableCells);
+        generateMapper(autoController.name());
+        generateRepository(autoController.name());
+    }
 
-        List<CustomField> customFields = new ArrayList<>();
-        if(tableCells != null){
-            tableCells.forEach(tableCell -> {
-                CustomField customField = new CustomField();
-                customField.setModifier("private");
-                customField.setReturnType(DataType.dbToJava(tableCell.getDatatype()));
-                customField.setName(tableCell.getColumnName());
-                customFields.add(customField);
-            });
-        }
+    private void generateEntity(String className, String tableName, List<TableCell> tableCells) {
+
+        List<CustomAnnotation> customAnnotations = new ArrayList<>(Constants.ENTITY_CLASS_ANNOTATIONS);
+        customAnnotations.add(new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\""+tableName+"\""))));
+        List<CustomField> customFields = buildCustomFileds(tableCells);
 
         String entityClassName = className + Constants.SUFFIX_ENTITY;
         String fullClassName = Constants.ENTITY_PACKAGE + "." + entityClassName;
@@ -106,15 +96,18 @@ public class AutoControllerProcessor extends AbstractProcessor {
         generateClassFileAndSource(fullClassName, classString);
     }
 
-    private void generateDTO(String className){
+    private void generateDTO(String className, List<TableCell> tableCells){
 
         String dtoClassName = className + Constants.SUFFIX_DTO;
         String fullClassName = Constants.DTO_PACKAGE + "." + dtoClassName;
+        List<CustomField> customFields = buildCustomFileds(tableCells);
+
         CustomClass customClass = CustomClass.builder().packageName(Constants.DTO_PACKAGE)
                 .imports(Constants.DTO_CLASS_IMPORTS)
                 .classType("class")
                 .className(dtoClassName)
                 .customAnnotations(Constants.DTO_CLASS_ANNOTATIONS)
+                .classFields(customFields)
                 .build();
 
         String classAsString = new ClassStringMaker(customClass).classAsString();
@@ -179,6 +172,20 @@ public class AutoControllerProcessor extends AbstractProcessor {
                 .customClassExtends(customClassExtends)
                 .customAnnotations(customAnnotations)
                 .build();
+    }
+
+    private List<CustomField> buildCustomFileds(List<TableCell> tableCells){
+        List<CustomField> customFields = new ArrayList<>();
+        if(tableCells != null){
+            tableCells.forEach(tableCell -> {
+                CustomField customField = new CustomField();
+                customField.setModifier("private");
+                customField.setReturnType(DataType.dbToJava(tableCell.getDatatype()));
+                customField.setName(tableCell.getColumnName());
+                customFields.add(customField);
+            });
+        }
+        return customFields;
     }
 
     private CustomMethod buildCustomMethod(String modifier, String returnType, String methodName, List<MethodParameter> methodParameters){

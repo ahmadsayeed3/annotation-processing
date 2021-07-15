@@ -83,7 +83,7 @@ public class ClassStringMaker {
 
             if(customField.getCustomAnnotations() != null){
                 customField.getCustomAnnotations().forEach(customAnnotation -> {
-                    classString.append("@").append(customAnnotation.getName());
+                    classString.append("\t").append("@").append(customAnnotation.getName());
                     if(customAnnotation.getAnnotationParameters() != null){
                         classString.append("(");
                         customAnnotation.getAnnotationParameters().forEach(annotationParameter -> {
@@ -98,7 +98,7 @@ public class ClassStringMaker {
                 });
             }
 
-            classString.append(customField.getModifier()).append(" ")
+            classString.append("\t").append(customField.getModifier()).append(" ")
                     .append(customField.getReturnType()).append(" ")
                     .append(customField.getName()).append(";");
             classString.append("\n");
@@ -110,7 +110,7 @@ public class ClassStringMaker {
             return;
 
         customClass.getCustomMethods().forEach(customMethod -> {
-            classString.append(customMethod.getModifier()).append(" ")
+            classString.append("\t").append(customMethod.getModifier()).append(" ")
                     .append(customMethod.getReturnType()).append(" ")
                     .append(customMethod.getName()).append("(");
 

@@ -28,7 +28,11 @@ public class Constants {
     /*=== DTO ============================*/
     public static String DTO_PACKAGE = DEFAULT_PACKAGE +".dto";
     public static String SUFFIX_DTO = "DTO";
-    public static List<String> DTO_CLASS_IMPORTS = Arrays.asList("lombok.Data", "lombok.AllArgsConstructor", "lombok.NoArgsConstructor");
+    public static List<String> DTO_CLASS_IMPORTS = Arrays.asList("lombok.Data",
+            "lombok.AllArgsConstructor",
+            "lombok.NoArgsConstructor",
+            "java.util.Date");
+
     public static List<CustomAnnotation> DTO_CLASS_ANNOTATIONS = Arrays.asList(new CustomAnnotation("Data", null),
             new CustomAnnotation("AllArgsConstructor", null));
 
