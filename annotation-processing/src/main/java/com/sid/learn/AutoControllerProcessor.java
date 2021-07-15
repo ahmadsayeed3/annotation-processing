@@ -2,6 +2,7 @@ package com.sid.learn;
 
 import com.sid.learn.creator.*;
 import com.google.auto.service.AutoService;
+import com.sid.learn.creator.database.TableMetaData;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -13,6 +14,7 @@ import javax.tools.JavaFileObject;
 import java.beans.Introspector;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -44,24 +46,34 @@ public class AutoControllerProcessor extends AbstractProcessor {
                     if(element.getKind() == ElementKind.METHOD){
                         AutoController autoController = element.getAnnotation(AutoController.class);
                         String name = autoController.name();
-                        generateClassFileAndSource(name);
+                        try {
+                            generateClassFileAndSource(autoController);
+                        } catch (SQLException throwable) {
+                            throwable.printStackTrace();
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
         return false;
     }
 
-    private void generateClassFileAndSource(String className){
-        generateEntity(className);
-        generateDTO(className);
-        generateMapper(className);
+    private void generateClassFileAndSource(AutoController autoController) throws SQLException, ClassNotFoundException {
+        generateEntity(autoController.name(), autoController.tableName());
+        generateDTO(autoController.name());
+        generateMapper(autoController.name());
     }
 
-    private void generateEntity(String className){
+    private void generateEntity(String className, String tableName) throws SQLException, ClassNotFoundException {
         List<String> imports = Arrays.asList("javax.persistence.Entity",
-                "javax.persistence.Table");
+                "javax.persistence.Table","lombok.Data", "lombok.AllArgsConstructor", "lombok.NoArgsConstructor");
         List<CustomAnnotation> customAnnotations = Arrays.asList(
                 new CustomAnnotation("Entity", null),
-                new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\"user\""))));
+                new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\"user\""))),
+                new CustomAnnotation("Data", null),
+                new CustomAnnotation("AllArgsConstructor", null));
+
+        //TableMetaData tableMetaData = new TableMetaData(tableName);
 
         String entityPackage = DEFAULT_PACKAGE + ".entity";
         String entityClassName = className + "Entity";
