@@ -1,8 +1,12 @@
 package com.sid.learn;
 
 import com.sid.learn.annotations.AutoController;
+import com.sid.learn.constants.Constants;
+import com.sid.learn.constants.DataType;
 import com.sid.learn.creator.*;
 import com.google.auto.service.AutoService;
+import com.sid.learn.creator.database.TableCell;
+import com.sid.learn.creator.database.TableMetaData;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -65,7 +69,27 @@ public class AutoControllerProcessor extends AbstractProcessor {
         List<CustomAnnotation> customAnnotations = new ArrayList<>(Constants.ENTITY_CLASS_ANNOTATIONS);
         customAnnotations.add(new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\""+tableName+"\""))));
 
-        //TableMetaData tableMetaData = new TableMetaData(tableName);
+        List<TableCell> tableCells = null;
+        try {
+            TableMetaData tableMetaData = new TableMetaData(tableName);
+            tableCells = tableMetaData.getTableCells();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        List<CustomField> customFields = new ArrayList<>();
+        if(tableCells != null){
+            tableCells.forEach(tableCell -> {
+                CustomField customField = new CustomField();
+                customField.setModifier("private");
+                customField.setReturnType(DataType.dbToJava(tableCell.getDatatype()));
+                customField.setName(tableCell.getColumnName());
+                customFields.add(customField);
+            });
+        }
+
         String entityClassName = className + Constants.SUFFIX_ENTITY;
         String fullClassName = Constants.ENTITY_PACKAGE + "." + entityClassName;
         CustomClass customClass = CustomClass.builder()
@@ -74,6 +98,7 @@ public class AutoControllerProcessor extends AbstractProcessor {
                 .classType("class")
                 .className(entityClassName)
                 .customAnnotations(customAnnotations)
+                .classFields(customFields)
                 .build();
 
         ClassStringMaker classStringMaker = new ClassStringMaker(customClass);

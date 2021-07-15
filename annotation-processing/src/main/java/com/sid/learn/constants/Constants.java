@@ -1,4 +1,7 @@
-package com.sid.learn.creator;
+package com.sid.learn.constants;
+
+import com.sid.learn.creator.AnnotationParameter;
+import com.sid.learn.creator.CustomAnnotation;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +14,11 @@ public class Constants {
     public static String SUFFIX_ENTITY = "Entity";
 
     public static List<String> ENTITY_CLASS_IMPORTS = Arrays.asList("javax.persistence.Entity",
-            "javax.persistence.Table","lombok.Data", "lombok.AllArgsConstructor", "lombok.NoArgsConstructor");
+            "javax.persistence.Table",
+            "lombok.Data",
+            "lombok.AllArgsConstructor",
+            "lombok.NoArgsConstructor",
+            "java.util.Date");
 
     public static List<CustomAnnotation> ENTITY_CLASS_ANNOTATIONS = Arrays.asList(
             new CustomAnnotation("Entity", null),

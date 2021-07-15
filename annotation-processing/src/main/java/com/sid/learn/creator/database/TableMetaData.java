@@ -28,7 +28,7 @@ public class TableMetaData {
     private void makeDBConnection() throws SQLException, ClassNotFoundException {
         Class.forName("org.postgresql.Driver");
         connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/lazy-wallet?sslmode=disable","postgres","12345");
+                "jdbc:postgresql://localhost:5432/lazy-wallet?sslmode=disable","postgres","54321");
 
     }
 
@@ -39,21 +39,11 @@ public class TableMetaData {
             TableCell tableCell = new TableCell();
             tableCell.setColumnName(columns.getString("COLUMN_NAME"));
             tableCell.setColumnSize(columns.getString("COLUMN_SIZE"));
-            tableCell.setDatatype(columns.getString("DATA_TYPE"));
-            tableCell.setIsNullable(columns.getString("IS_NULLABLE"));
-            tableCell.setIsAutoIncrement(columns.getString("IS_AUTOINCREMENT"));
-
+            tableCell.setDatatype(columns.getInt("DATA_TYPE"));
+            tableCell.setNullable(columns.getBoolean("IS_NULLABLE"));
+            tableCell.setAutoIncrement(columns.getBoolean("IS_AUTOINCREMENT"));
             tableCells.add(tableCell);
         }
     }
 
-}
-
-@Data
-class TableCell{
-    private String columnName;
-    private String columnSize;
-    private String datatype;
-    private String isNullable;
-    private String isAutoIncrement;
 }

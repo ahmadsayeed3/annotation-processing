@@ -16,6 +16,7 @@ public class ClassStringMaker {
         setClassName();
         setClassExtends();
         setClassOpen();
+        setCustomFields();
         setAbstractMethod();
         setClassClose();
         return classString.toString();
@@ -72,6 +73,36 @@ public class ClassStringMaker {
 
     private void setClassOpen(){
         classString.append("{").append("\n");
+    }
+
+    private void setCustomFields(){
+        if(customClass.getClassFields() == null)
+            return;
+
+        customClass.getClassFields().forEach(customField -> {
+
+            if(customField.getCustomAnnotations() != null){
+                customField.getCustomAnnotations().forEach(customAnnotation -> {
+                    classString.append("@").append(customAnnotation.getName());
+                    if(customAnnotation.getAnnotationParameters() != null){
+                        classString.append("(");
+                        customAnnotation.getAnnotationParameters().forEach(annotationParameter -> {
+                            classString.append(annotationParameter.getName()).append(" = ")
+                                    .append(annotationParameter.getValue()).append(",");
+                        });
+                        classString.replace(classString.lastIndexOf(","), classString.length(), "");
+                        classString.append(")");
+                    }
+
+                    classString.append("\n");
+                });
+            }
+
+            classString.append(customField.getModifier()).append(" ")
+                    .append(customField.getReturnType()).append(" ")
+                    .append(customField.getName()).append(";");
+            classString.append("\n");
+        });
     }
 
     private void setAbstractMethod(){
