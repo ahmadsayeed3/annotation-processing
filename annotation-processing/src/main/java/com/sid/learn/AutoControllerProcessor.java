@@ -1,8 +1,8 @@
 package com.sid.learn;
 
+import com.sid.learn.annotations.AutoController;
 import com.sid.learn.creator.*;
 import com.google.auto.service.AutoService;
-import com.sid.learn.creator.database.TableMetaData;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-@SupportedAnnotationTypes("com.sid.learn.AutoController")
+@SupportedAnnotationTypes("com.sid.learn.annotations.AutoController")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
 public class AutoControllerProcessor extends AbstractProcessor {
@@ -47,30 +47,23 @@ public class AutoControllerProcessor extends AbstractProcessor {
                     if(element.getKind() == ElementKind.METHOD){
                         AutoController autoController = element.getAnnotation(AutoController.class);
                         String name = autoController.name();
-                        try {
-                            generateClassFileAndSource(autoController);
-                        } catch (SQLException throwable) {
-                            throwable.printStackTrace();
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
+                        generateClassFileAndSource(autoController);
                     }
                 });
         return false;
     }
 
-    private void generateClassFileAndSource(AutoController autoController) throws SQLException, ClassNotFoundException {
+    private void generateClassFileAndSource(AutoController autoController) {
         generateEntity(autoController.name(), autoController.tableName());
         generateDTO(autoController.name());
         generateMapper(autoController.name());
         generateRepository(autoController.name());
     }
 
-    private void generateEntity(String className, String tableName) throws SQLException, ClassNotFoundException {
+    private void generateEntity(String className, String tableName) {
 
         List<CustomAnnotation> customAnnotations = new ArrayList<>(Constants.ENTITY_CLASS_ANNOTATIONS);
         customAnnotations.add(new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\""+tableName+"\""))));
-
 
         //TableMetaData tableMetaData = new TableMetaData(tableName);
         String entityClassName = className + Constants.SUFFIX_ENTITY;

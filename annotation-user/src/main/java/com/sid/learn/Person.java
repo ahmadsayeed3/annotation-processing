@@ -1,6 +1,6 @@
 package com.sid.learn;
 
-import com.sid.learn.BuilderProperty;
+import com.sid.learn.annotations.BuilderProperty;
 
 public class Person {
 
