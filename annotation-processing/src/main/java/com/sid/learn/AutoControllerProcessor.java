@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 @SupportedAnnotationTypes("com.sid.learn.annotations.AutoController")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 @AutoService(Processor.class)
 public class AutoControllerProcessor extends AbstractProcessor {
 
@@ -78,7 +78,7 @@ public class AutoControllerProcessor extends AbstractProcessor {
 
         List<CustomAnnotation> customAnnotations = new ArrayList<>(Constants.ENTITY_CLASS_ANNOTATIONS);
         customAnnotations.add(new CustomAnnotation("Table", Arrays.asList(new AnnotationParameter("name", "\""+tableName+"\""))));
-        List<CustomField> customFields = buildCustomFileds(tableCells);
+        List<CustomField> customFields = buildEntityFields(tableCells);
 
         String entityClassName = className + Constants.SUFFIX_ENTITY;
         String fullClassName = Constants.ENTITY_PACKAGE + "." + entityClassName;
@@ -100,7 +100,7 @@ public class AutoControllerProcessor extends AbstractProcessor {
 
         String dtoClassName = className + Constants.SUFFIX_DTO;
         String fullClassName = Constants.DTO_PACKAGE + "." + dtoClassName;
-        List<CustomField> customFields = buildCustomFileds(tableCells);
+        List<CustomField> customFields = buildDTOFields(tableCells);
 
         CustomClass customClass = CustomClass.builder().packageName(Constants.DTO_PACKAGE)
                 .imports(Constants.DTO_CLASS_IMPORTS)
@@ -174,7 +174,31 @@ public class AutoControllerProcessor extends AbstractProcessor {
                 .build();
     }
 
-    private List<CustomField> buildCustomFileds(List<TableCell> tableCells){
+    private List<CustomField> buildEntityFields(List<TableCell> tableCells){
+        List<CustomField> customFields = new ArrayList<>();
+        if(tableCells != null){
+            tableCells.forEach(tableCell -> {
+                CustomField customField = new CustomField();
+                customField.setModifier("private");
+                customField.setReturnType(DataType.dbToJava(tableCell.getDatatype()));
+                customField.setName(tableCell.getColumnName());
+                customFields.add(customField);
+
+                if(tableCell.isPrimaryKey()){
+                    List<CustomAnnotation> customAnnotations = Arrays.asList(
+                            new CustomAnnotation("Id", null),
+                            new CustomAnnotation("GeneratedValue",
+                                    Arrays.asList(new AnnotationParameter("strategy", "GenerationType.IDENTITY")))
+                    );
+                    customField.setCustomAnnotations(customAnnotations);
+                }
+
+            });
+        }
+        return customFields;
+    }
+
+    private List<CustomField> buildDTOFields(List<TableCell> tableCells){
         List<CustomField> customFields = new ArrayList<>();
         if(tableCells != null){
             tableCells.forEach(tableCell -> {

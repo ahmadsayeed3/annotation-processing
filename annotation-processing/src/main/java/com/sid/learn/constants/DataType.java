@@ -9,7 +9,7 @@ public class DataType {
         return javaDataType.get(code);
     }
 
-    private static Map<Integer, String> javaDataType = new HashMap<>() {{
+    private static Map<Integer, String> javaDataType = new HashMap<Integer, String>() {{
         put(-5, "long");
         put(12, "String");
         put(93, "Date");

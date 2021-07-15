@@ -9,4 +9,5 @@ public class TableCell{
     private int datatype;
     private boolean isNullable;
     private boolean isAutoIncrement;
+    private boolean isPrimaryKey;
 }

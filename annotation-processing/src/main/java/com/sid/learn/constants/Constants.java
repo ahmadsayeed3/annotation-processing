@@ -18,7 +18,8 @@ public class Constants {
             "lombok.Data",
             "lombok.AllArgsConstructor",
             "lombok.NoArgsConstructor",
-            "java.util.Date");
+            "java.util.Date",
+            "javax.persistence.*");
 
     public static List<CustomAnnotation> ENTITY_CLASS_ANNOTATIONS = Arrays.asList(
             new CustomAnnotation("Entity", null),

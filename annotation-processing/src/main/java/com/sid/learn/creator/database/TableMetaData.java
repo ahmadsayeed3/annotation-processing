@@ -6,6 +6,7 @@ import lombok.Getter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class TableMetaData {
@@ -43,6 +44,16 @@ public class TableMetaData {
             tableCell.setNullable(columns.getBoolean("IS_NULLABLE"));
             tableCell.setAutoIncrement(columns.getBoolean("IS_AUTOINCREMENT"));
             tableCells.add(tableCell);
+        }
+
+        ResultSet primaryKeys = databaseMetaData.getPrimaryKeys(null, null, tableName);
+        while(primaryKeys.next()){
+            String primaryKeyColumnName = primaryKeys.getString("COLUMN_NAME");
+            String primaryKeyName = primaryKeys.getString("PK_NAME");
+            TableCell tableCell = tableCells.stream().
+                    filter(cell-> cell.getColumnName().equalsIgnoreCase(primaryKeyColumnName)).
+                    findFirst().get();
+            tableCell.setPrimaryKey(true);
         }
     }
 

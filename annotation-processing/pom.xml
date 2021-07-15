@@ -22,17 +22,18 @@
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
             <version>${auto-service.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>1.4.2.Final</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
