@@ -15,6 +15,7 @@ import java.beans.Introspector;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,7 @@ public class AutoControllerProcessor extends AbstractProcessor {
     private Elements elementUtils;
     private Filer filer;
     private Messager messager;
-    private static String DEFAULT_PACKAGE = "com.auto.controller";
+    private String DEFAULT_PACKAGE = "com.auto.controller";
 
     @Override
     public void init(ProcessingEnvironment env) {
@@ -62,6 +63,7 @@ public class AutoControllerProcessor extends AbstractProcessor {
         generateEntity(autoController.name(), autoController.tableName());
         generateDTO(autoController.name());
         generateMapper(autoController.name());
+        generateRepository(autoController);
     }
 
     private void generateEntity(String className, String tableName) throws SQLException, ClassNotFoundException {
@@ -146,6 +148,32 @@ public class AutoControllerProcessor extends AbstractProcessor {
         String classAsString = new ClassStringMaker(customClass).classAsString();
         generateClassFileAndSource(fullClassName, classAsString);
 
+    }
+
+    private void generateRepository(AutoController autoController){
+        String repositoryClassName = autoController.name() + "Repository";
+        String repositoryPackage = DEFAULT_PACKAGE + "." + "repository";
+        String fullClassName = repositoryPackage + "." + repositoryClassName;
+        String entityClassName = autoController.name() + "Entity";
+
+        List<String> imports = Arrays.asList("org.springframework.stereotype.Repository",
+                "org.springframework.data.jpa.repository.JpaRepository",
+                "com.auto.controller.entity." + entityClassName);
+
+        List<CustomAnnotation> customAnnotations = Arrays.asList(new CustomAnnotation("Repository", null));
+
+
+
+        CustomClass customClass = CustomClass.builder().packageName(repositoryPackage)
+                .imports(imports)
+                .classType("interface")
+                .className(repositoryClassName)
+                .customClassExtends(new CustomClassExtends("JpaRepository", Arrays.asList(entityClassName, "Long")))
+                .customAnnotations(customAnnotations)
+                .build();
+
+        String classAsString = new ClassStringMaker(customClass).classAsString();
+        generateClassFileAndSource(fullClassName, classAsString);
     }
 
     private void generateClassFileAndSource(String fullClassName, String classText){

@@ -14,8 +14,10 @@ public class ClassStringMaker {
         setPackage();
         setImports();
         setClassName();
+        setClassExtends();
+        setClassOpen();
         setAbstractMethod();
-        setCloseClass();
+        setClassClose();
         return classString.toString();
     }
 
@@ -48,7 +50,28 @@ public class ClassStringMaker {
             });
         }
         classString.append("public ").append(customClass.getClassType()).append(" ")
-                .append(customClass.getClassName()).append("{").append("\n");
+        .append(customClass.getClassName()).append(" ");
+    }
+
+    private void setClassExtends(){
+        if(customClass.getCustomClassExtends() == null)
+            return;
+
+        classString.append("extends ").append(customClass.getCustomClassExtends().getClassName());
+
+        if(customClass.getCustomClassExtends().getParameters() == null)
+            return;
+
+        classString.append("<");
+        customClass.getCustomClassExtends().getParameters().forEach(param -> {
+            classString.append(param).append(",");
+        });
+        classString.replace(classString.lastIndexOf(","), classString.length(), "");
+        classString.append(">");
+    }
+
+    private void setClassOpen(){
+        classString.append("{").append("\n");
     }
 
     private void setAbstractMethod(){
@@ -71,7 +94,7 @@ public class ClassStringMaker {
         });
     }
 
-    private void setCloseClass(){
+    private void setClassClose(){
         classString.append("}").append("\n");
     }
 

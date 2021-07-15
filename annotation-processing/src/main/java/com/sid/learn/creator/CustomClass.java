@@ -13,6 +13,7 @@ public class CustomClass {
     private String packageName;
     private String classType;
     private String className;
+    private CustomClassExtends customClassExtends;
     private List<CustomField> classFields;
     private List<CustomMethod> customMethods;
     private List<CustomAnnotation> customAnnotations;
