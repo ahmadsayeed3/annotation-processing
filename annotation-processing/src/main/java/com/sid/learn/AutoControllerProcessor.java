@@ -117,7 +117,8 @@ public class AutoControllerProcessor extends AbstractProcessor {
     private void generateMapper(String className){
         String dtoClassImport = "com.auto.controller.dto." + className + "DTO";
         String entityClassImport = "com.auto.controller.entity." + className + "Entity";
-        List<String> imports = Arrays.asList("org.mapstruct.*", dtoClassImport, entityClassImport);
+        List<String> imports = Arrays.asList("org.mapstruct.*", dtoClassImport, entityClassImport,
+                "org.springframework.stereotype.Service");
 
         String entityClassName = className + Constants.SUFFIX_ENTITY;
         String dtoClassName = className + Constants.SUFFIX_DTO;
@@ -135,7 +136,7 @@ public class AutoControllerProcessor extends AbstractProcessor {
                 .imports(imports)
                 .classType("interface")
                 .className(mapperClassName)
-                .customAnnotations(Constants.MAPPER_INTERFACE_IMPORTS)
+                .customAnnotations(Constants.MAPPER_INTERFACE_ANNOTATIONS)
                 .customMethods(Arrays.asList(dtoToEntityMethod, entityToDtoMethod))
                 .build();
 

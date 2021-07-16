@@ -17,6 +17,7 @@ public class ClassStringMaker {
         setClassExtends();
         setClassOpen();
         setCustomFields();
+        setSetterAndGetter();
         setAbstractMethod();
         setClassClose();
         return classString.toString();
@@ -103,6 +104,34 @@ public class ClassStringMaker {
                     .append(customField.getName()).append(";");
             classString.append("\n");
         });
+    }
+
+    private void setSetterAndGetter(){
+        if(null == customClass.getClassFields())
+            return;
+
+        customClass.getClassFields().forEach(customField -> {
+            setSetter(customField);
+            setGetter(customField);
+        });
+    }
+
+    private void setSetter(CustomField customField){
+        classString.append("\n\t");
+        classString.append("public").append(" ")
+                .append("void").append(" ")
+                .append("set" + customField.getName()).append("(").append(customField.getReturnType()).append(" ").append(customField.getName()).append("){").append("\n")
+                .append("\t\t").append("this.").append(customField.getName()).append("=").append(customField.getName()).append(";").append("\n")
+                .append("\t").append("}").append("\n");
+    }
+
+    private void setGetter(CustomField customField){
+        classString.append("\n\t");
+        classString.append("public").append(" ")
+                .append(customField.getReturnType()).append(" ")
+                .append("get" + customField.getName()).append("(){").append("\n")
+                .append("\t\t").append("return this.").append(customField.getName()).append(";").append("\n")
+                .append("\t").append("}").append("\n");
     }
 
     private void setAbstractMethod(){

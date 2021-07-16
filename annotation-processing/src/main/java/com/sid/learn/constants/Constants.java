@@ -3,6 +3,7 @@ package com.sid.learn.constants;
 import com.sid.learn.creator.AnnotationParameter;
 import com.sid.learn.creator.CustomAnnotation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,34 +16,26 @@ public class Constants {
 
     public static List<String> ENTITY_CLASS_IMPORTS = Arrays.asList("javax.persistence.Entity",
             "javax.persistence.Table",
-            "lombok.Data",
-            "lombok.AllArgsConstructor",
-            "lombok.NoArgsConstructor",
             "java.util.Date",
             "javax.persistence.*");
 
     public static List<CustomAnnotation> ENTITY_CLASS_ANNOTATIONS = Arrays.asList(
-            new CustomAnnotation("Entity", null),
-            new CustomAnnotation("Data", null),
-            new CustomAnnotation("AllArgsConstructor", null));
+            new CustomAnnotation("Entity", null));
 
     /*=== DTO ============================*/
     public static String DTO_PACKAGE = DEFAULT_PACKAGE +".dto";
     public static String SUFFIX_DTO = "DTO";
-    public static List<String> DTO_CLASS_IMPORTS = Arrays.asList("lombok.Data",
-            "lombok.AllArgsConstructor",
-            "lombok.NoArgsConstructor",
-            "java.util.Date");
+    public static List<String> DTO_CLASS_IMPORTS = Arrays.asList("java.util.Date");
 
-    public static List<CustomAnnotation> DTO_CLASS_ANNOTATIONS = Arrays.asList(new CustomAnnotation("Data", null),
-            new CustomAnnotation("AllArgsConstructor", null));
+    public static List<CustomAnnotation> DTO_CLASS_ANNOTATIONS = new ArrayList<>();
 
 
     /*=== Mapper ============================*/
     public static String MAPPER_PACKAGE = DEFAULT_PACKAGE + ".mapper";
     public static String SUFFIX_MAPPER = "Mapper";
-    public static List<CustomAnnotation> MAPPER_INTERFACE_IMPORTS = Arrays.asList(
-            new CustomAnnotation("Mapper", Arrays.asList(new AnnotationParameter("componentModel", "\"spring\""))));
+    public static List<CustomAnnotation> MAPPER_INTERFACE_ANNOTATIONS = Arrays.asList(
+            new CustomAnnotation("Mapper", Arrays.asList(new AnnotationParameter("componentModel", "\"spring\""))),
+            new CustomAnnotation("Service", null));
 
     /*=== Mapper ============================*/
     public static String REPOSITORY_PACKAGE = DEFAULT_PACKAGE + ".repository";
